@@ -1,0 +1,67 @@
+CREATE TABLE Student(
+  rollno INT PRIMARY KEY,
+  name   VARCHAR(50),
+  class  VARCHAR(10)
+);
+
+CREATE TABLE Marks(
+  rollno  INT,
+  subject VARCHAR(50),
+  marks   INT
+);
+
+INSERT INTO Student (rollno, name, class) VALUES
+(1,'Amit','FY'),
+(2,'Riya','SY'),
+(3,'Karan','TY'),
+(4,'Neha','FY');
+
+INSERT INTO Marks (rollno, subject, marks) VALUES
+(1,'Math',85),
+(1,'Science',78),
+(2,'Math',65),
+(3,'Science',55),
+(5,'Math',72);
+
+SELECT * FROM Student;
+
+SELECT * FROM Marks;
+
+SELECT s.name, m.subject, m.marks
+FROM Student s
+INNER JOIN Marks m ON s.rollno = m.rollno;
+
+SELECT s.name, m.subject, m.marks
+FROM Student s
+LEFT JOIN Marks m ON s.rollno = m.rollno
+ORDER BY s.rollno, m.subject;
+
+SELECT s.name, m.subject, m.marks
+FROM Student s
+RIGHT JOIN Marks m ON s.rollno = m.rollno
+ORDER BY m.rollno, m.subject;
+
+SELECT s.name, m.subject, m.marks
+FROM Student s
+JOIN Marks m ON s.rollno = m.rollno
+WHERE m.marks > 70;
+
+SELECT name
+FROM Student
+WHERE rollno IN (SELECT rollno FROM Marks);
+
+SELECT name
+FROM Student
+WHERE rollno NOT IN (SELECT rollno FROM Marks);
+
+SELECT rollno, COUNT(*) AS total_subjects
+FROM Marks
+GROUP BY rollno
+ORDER BY rollno;
+
+CREATE VIEW student_report AS
+SELECT s.rollno, s.name, s.class, m.subject, m.marks
+FROM Student s
+JOIN Marks m ON s.rollno = m.rollno;
+
+SELECT * FROM student_report ORDER BY rollno, subject;

@@ -1,0 +1,46 @@
+CREATE TABLE Student(
+  rollno INT PRIMARY KEY,
+  name   VARCHAR(50)
+);
+
+CREATE TABLE Marks(
+  rollno  INT,
+  subject VARCHAR(50),
+  marks   INT
+);
+
+INSERT INTO Student VALUES (1,'Amit'), (2,'Riya');
+INSERT INTO Marks VALUES (1,'Math',80), (1,'Science',75), (2,'Math',60);
+
+DELIMITER //
+CREATE PROCEDURE add_marks(
+  IN p_rollno INT,
+  IN p_subject VARCHAR(50),
+  IN p_marks INT
+)
+BEGIN
+  INSERT INTO Marks(rollno, subject, marks)
+  VALUES(p_rollno, p_subject, p_marks);
+END//
+DELIMITER ;
+
+CALL add_marks(2, 'Science', 70);
+
+DELIMITER //
+CREATE FUNCTION total_marks(p_rollno INT)
+RETURNS INT
+DETERMINISTIC
+READS SQL DATA
+BEGIN
+  DECLARE total INT DEFAULT 0;
+  SELECT COALESCE(SUM(marks),0) INTO total
+  FROM Marks
+  WHERE rollno = p_rollno;
+  RETURN total;
+END//
+DELIMITER ;
+
+SELECT total_marks(1) AS total_roll1,
+       total_marks(2) AS total_roll2;
+
+SELECT * FROM Student;

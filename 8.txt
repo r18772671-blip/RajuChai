@@ -1,0 +1,36 @@
+use college;
+
+db.students.drop();
+
+db.students.insertMany([
+  {_id: 101, name: "Amit",  dept: "CS",   year: 1, gpa: 7.5, subjects: ["DBMS","Math"]},
+  {_id: 102, name: "Riya",  dept: "IT",   year: 2, gpa: 8.4, subjects: ["Networks","DBMS"]},
+  {_id: 103, name: "Karan", dept: "CS",   year: 3, gpa: 6.9, subjects: ["OS","Math"]},
+  {_id: 104, name: "Neha",  dept: "ENTC", year: 1, gpa: 9.1, subjects: ["Signals","Math"]}
+]);
+
+db.students.find();                       
+db.students.find({ dept: "CS" });         
+db.students.find({}, {name:1, dept:1});   
+
+db.students.updateOne(
+  { _id: 101 },
+  { $set: { gpa: 8.0 } }
+);
+
+db.students.save(
+  { _id: 101, name: "Amit", dept: "CS", year: 1, gpa: 8.2, subjects: ["DBMS","Math"] }
+);
+
+db.students.find({ $and: [ {dept: "CS"}, {gpa: {$gt: 8}} ] });
+
+db.students.find({ $or: [ {dept: "CS"}, {year: 3} ] });
+
+db.students.find({ subjects: { $in: ["DBMS","OS"] } });
+
+db.students.find({ gpa: { $gte: 7, $lt: 9 } });
+
+db.students.deleteOne({ _id: 103 });
+
+db.students.find().pretty();
+db.students.countDocuments();

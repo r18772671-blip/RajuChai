@@ -1,0 +1,66 @@
+CREATE TABLE Student(
+  rollno INT PRIMARY KEY,
+  name   VARCHAR(50)
+);
+
+CREATE TABLE Marks(
+  rollno INT,
+  subject VARCHAR(50),
+  marks INT
+);
+
+INSERT INTO Student VALUES (1,'Amit'),(2,'Riya');
+INSERT INTO Marks VALUES (1,'Math',80),(2,'Science',70);
+
+CREATE TABLE Marks_Log(
+  rollno INT,
+  subject VARCHAR(50),
+  marks INT,
+  deleted_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+DELIMITER //
+CREATE TRIGGER trg_before_insert_student
+BEFORE INSERT ON Student
+FOR EACH ROW
+BEGIN
+  SET NEW.name = UPPER(NEW.name);
+END//
+DELIMITER ;
+
+CREATE TABLE Marks_Audit(
+  rollno INT, subject VARCHAR(50),
+  old_marks INT, new_marks INT,
+  changed_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+DELIMITER //
+CREATE TRIGGER trg_after_update_marks
+AFTER UPDATE ON Marks
+FOR EACH ROW
+BEGIN
+  INSERT INTO Marks_Audit(rollno, subject, old_marks, new_marks)
+  VALUES(OLD.rollno, OLD.subject, OLD.marks, NEW.marks);
+END//
+DELIMITER ;
+
+DELIMITER //
+CREATE TRIGGER trg_before_delete_marks
+BEFORE DELETE ON Marks
+FOR EACH ROW
+BEGIN
+  INSERT INTO Marks_Log(rollno, subject, marks)
+  VALUES(OLD.rollno, OLD.subject, OLD.marks);
+END//
+DELIMITER ;
+
+INSERT INTO Student VALUES (3,'karan');
+
+UPDATE Marks SET marks = 90 WHERE rollno=1 AND subject='Math';
+
+DELETE FROM Marks WHERE rollno=2 AND subject='Science';
+
+SELECT * FROM Student;
+SELECT * FROM Marks;
+SELECT * FROM Marks_Audit;
+SELECT * FROM Marks_Log;
