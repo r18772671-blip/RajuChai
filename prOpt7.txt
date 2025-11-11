@@ -1,0 +1,70 @@
+CREATE DATABASE IF NOT EXISTS library_db;
+USE library_db;
+
+DROP TABLE IF EXISTS library;
+DROP TABLE IF EXISTS library_audit;
+
+CREATE TABLE library (
+    book_id INT PRIMARY KEY,
+    member_name VARCHAR(50),
+    issue_date DATE,
+    book_title VARCHAR(100),
+    book_status VARCHAR(20),
+    author_name VARCHAR(50)
+);
+
+CREATE TABLE library_audit (
+    book_id INT,
+    member_name VARCHAR(50),
+    issue_date DATE,
+    book_title VARCHAR(100),
+    book_status VARCHAR(20),
+    author_name VARCHAR(50),
+    action VARCHAR(10),
+    action_time TIMESTAMP
+);
+
+INSERT INTO library VALUES
+(1, 'Alice', '2023-01-10', 'The Alchemist', 'available', 'Paulo Coelho'),
+(2, 'Bob', '2023-02-12', '1984', 'not_available', 'George Orwell'),
+(3, 'Charlie', '2023-03-05', 'Sapiens', 'available', 'Yuval Harari'),
+(4, 'David', '2023-04-20', 'Dune', 'available', 'Frank Herbert'),
+(5, 'Eva', '2023-05-15', 'Inferno', 'not_available', 'Dan Brown');
+
+DELIMITER //
+
+CREATE TRIGGER trg_library_insert
+AFTER INSERT ON library
+FOR EACH ROW
+BEGIN
+    INSERT INTO library_audit 
+    VALUES (NEW.book_id, NEW.member_name, NEW.issue_date, NEW.book_title, NEW.book_status, NEW.author_name, 'INSERT', NOW());
+END;
+//
+
+CREATE TRIGGER trg_library_update
+AFTER UPDATE ON library
+FOR EACH ROW
+BEGIN
+    INSERT INTO library_audit 
+    VALUES (OLD.book_id, OLD.member_name, OLD.issue_date, OLD.book_title, OLD.book_status, OLD.author_name, 'UPDATE', NOW());
+END;
+//
+
+CREATE TRIGGER trg_library_delete
+BEFORE DELETE ON library
+FOR EACH ROW
+BEGIN
+    INSERT INTO library_audit 
+    VALUES (OLD.book_id, OLD.member_name, OLD.issue_date, OLD.book_title, OLD.book_status, OLD.author_name, 'DELETE', NOW());
+END;
+//
+
+DELIMITER ;
+
+INSERT INTO library VALUES (6, 'Frank', '2023-06-10', 'Hamlet', 'available', 'Shakespeare');
+UPDATE library SET book_status='not_available', book_title='Animal Farm' WHERE member_name='Bob';
+DELETE FROM library WHERE book_id=3;
+
+SELECT * FROM library;
+SELECT * FROM library_audit;

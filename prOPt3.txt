@@ -1,0 +1,64 @@
+DROP DATABASE IF EXISTS schooldb;
+CREATE DATABASE schooldb;
+USE schooldb;
+
+CREATE TABLE student (
+    student_id INT PRIMARY KEY,
+    student_name VARCHAR(30),
+    class_id INT
+);
+
+CREATE TABLE class (
+    class_id INT PRIMARY KEY,
+    class_name VARCHAR(20),
+    teacher_name VARCHAR(30),
+    room_no INT
+);
+
+INSERT INTO student VALUES
+(1,'Aarav',1),
+(2,'Saanvi',2),
+(3,'Vihaan',3);
+
+INSERT INTO class VALUES
+(1,'Mathematics', 'Mr. Sharma',101),
+(2,'Science', 'Mrs. Verma',102),
+(3,'History', 'Ms. Iyer',103);
+
+SELECT c.class_name, c.teacher_name, s.student_name
+FROM class c
+INNER JOIN student s ON c.class_id = s.class_id;
+
+SELECT c.class_name, c.teacher_name, s.student_name
+FROM class c
+LEFT JOIN student s ON c.class_id = s.class_id;
+
+SELECT c.class_name, c.teacher_name, s.student_name
+FROM class c
+RIGHT JOIN student s ON c.class_id = s.class_id;
+
+SELECT c.class_name, c.teacher_name, s.student_name
+FROM class c
+LEFT JOIN student s ON c.class_id = s.class_id
+UNION
+SELECT c.class_name, c.teacher_name, s.student_name
+FROM class c
+RIGHT JOIN student s ON c.class_id = s.class_id;
+
+SELECT * FROM class WHERE room_no > 101;
+
+SELECT * FROM class
+WHERE teacher_name = (SELECT teacher_name FROM class WHERE teacher_name = 'Ms. Iyer');
+
+SELECT * FROM student
+WHERE class_id = (SELECT class_id FROM class WHERE class_name = 'Science');
+
+CREATE VIEW class_student_view AS
+SELECT c.class_id, c.class_name, c.teacher_name, s.student_name
+FROM class c
+INNER JOIN student s ON c.class_id = s.class_id;
+
+SELECT * FROM class_student_view;
+
+SELECT * FROM class
+WHERE class_name IN (SELECT class_name FROM class_student_view);

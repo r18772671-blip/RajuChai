@@ -1,0 +1,60 @@
+CREATE DATABASE IF NOT EXISTS student_db;
+USE student_db;
+
+CREATE TABLE IF NOT EXISTS original_students(
+    roll_no INT,
+    student_name VARCHAR(20),
+    city VARCHAR(20)
+);
+
+CREATE TABLE IF NOT EXISTS new_students(
+    roll_no INT,
+    student_name VARCHAR(20),
+    city VARCHAR(20)
+);
+
+INSERT INTO original_students VALUES (1,'Rohit','Pune');
+INSERT INTO original_students VALUES (2,'Sneha','Mumbai');
+INSERT INTO original_students VALUES (3,'Ankit','Nagpur');
+INSERT INTO original_students VALUES (4,'Meera','Nashik');
+INSERT INTO original_students VALUES (5,'Kiran','Satara');
+
+DROP PROCEDURE IF EXISTS merge_students;
+
+DELIMITER //
+
+CREATE PROCEDURE merge_students(IN start_roll INT)
+BEGIN
+    DECLARE r INT;
+    DECLARE exit_loop BOOLEAN DEFAULT FALSE;
+    DECLARE c CURSOR FOR 
+        SELECT roll_no FROM original_students WHERE roll_no > start_roll;
+    DECLARE CONTINUE HANDLER FOR NOT FOUND SET exit_loop = TRUE;
+    
+    OPEN c;
+    
+    loop_merge: LOOP
+        FETCH c INTO r;
+        IF NOT EXISTS (SELECT * FROM new_students WHERE roll_no = r) THEN
+            INSERT INTO new_students
+            SELECT * FROM original_students WHERE roll_no = r;
+        END IF;
+        IF exit_loop THEN
+            CLOSE c;
+            LEAVE loop_merge;
+        END IF;
+    END LOOP loop_merge;
+END;
+//
+
+DELIMITER ;
+
+CALL merge_students(3);
+SELECT * FROM new_students;
+
+CALL merge_students(0);
+SELECT * FROM new_students;
+
+INSERT INTO original_students VALUES (6,'Pooja','Kolhapur');
+CALL merge_students(4);
+SELECT * FROM new_students;
